@@ -5,32 +5,31 @@ Ultrasonic::Ultrasonic(uint8_t trig, uint8_t echo)
     TRIG = trig;
     ECHO = echo;
 
-    pinMode(ECHO, OUTPUT);
-    pinMode(TRIG, INPUT );
+    pinMode(ECHO, INPUT );
+    pinMode(TRIG, OUTPUT);
 }
 
-
-void Ultrasonic::SetRange(unsigned int minDist, unsigned int maxDist)
+void   Ultrasonic::SetRange(unsigned int minDist, unsigned int maxDist)
 {
     SetMinDistance(minDist);
     SetMaxDistance(maxDist);
 }
-bool  Ultrasonic::RequestDistanceOnRange()
+bool   Ultrasonic::RequestDistanceOnRange()
 {
-    if (distance < minDistance || distance > maxDistance)
-    {
-        return false;
-    }
-
+    if (distance < minDistance || distance > maxDistance) return false;
+    
     return true;
 }
-float Ultrasonic::ReturnDistance()
+double Ultrasonic::ReturnDistance()
 {
-    digitalWrite(TRIG, HIGH);
-    delayMicroseconds(10);
     digitalWrite(TRIG, LOW );
-
+    delayMicroseconds(2);
+    digitalWrite(TRIG, HIGH);
+    delayMicroseconds(pulseDuration);
+    digitalWrite(TRIG, LOW );
+    
     int time = pulseIn(ECHO, HIGH);
+    distance = double(time*speedOfSound/2);
 
-    distance = time*speedOfSound/2;
+    return distance;
 }
