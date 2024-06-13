@@ -1,71 +1,102 @@
 #include "MotorDriver.h"
 
+
 MotorDriver::MotorDriver(uint8_t pinA1, uint8_t pinA2, uint8_t pinB1, uint8_t pinB2)
 {
-    motorA1 = pinA1;
-    motorA2 = pinA2;
-    motorB1 = pinB1;
-    motorB2 = pinB2;
+    if (pinA1 >= 0 && pinA1 <= NUM_DIGITAL_PINS) return;
+    if (pinA2 >= 0 && pinA2 <= NUM_DIGITAL_PINS) return;
+    if (pinB1 >= 0 && pinB1 <= NUM_DIGITAL_PINS) return;
+    if (pinB2 >= 0 && pinB2 <= NUM_DIGITAL_PINS) return;
 
-    pinMode(motorA1, OUTPUT);
-    pinMode(motorA2, OUTPUT);
-    pinMode(motorB1, OUTPUT);
-    pinMode(motorB2, OUTPUT);
+    motorLeft1  = pinA1;
+    motorLeft2  = pinA2;
+    motorRight1 = pinB1;
+    motorRight2 = pinB2;
+
+    pinMode(motorLeft1 , OUTPUT);
+    pinMode(motorLeft2 , OUTPUT);
+    pinMode(motorRight1, OUTPUT);
+    pinMode(motorRight2, OUTPUT);
+    
 }
-void MotorDriver::AttachEnables(uint8_t enA, uint8_t enB)
-{
-    enable_A = enA;
-    enable_B = enB;
 
-    pinMode(enable_A, OUTPUT);
-    pinMode(enable_B, OUTPUT);
+void MotorDriver::AttachEnables(uint8_t enL, uint8_t enR)
+{
+    enableLeft  = enL;
+    enableRight = enR;
+
+    pinMode(enableLeft , OUTPUT);
+    pinMode(enableRight, OUTPUT);
 }
 
 void MotorDriver::DriveMotors()
 {
-    bool dirA, dirB = ReturnDirection();
-    char velA, velB = ReturnVelocity();
+    bool dirLeft, dirRight;
+    char velLeft, velRight;
+    SendDirection(&dirLeft, &dirRight);
+    SendVelocity (&velLeft, &velRight);
     
-    analogWrite(enable_A, velA);
-    analogWrite(enable_B, velB);
+    analogWrite(enableLeft , velLeft );
+    analogWrite(enableRight, velRight);
 
-    digitalWrite(motorA1,  dirA);
-    digitalWrite(motorA2, !dirA);
-    digitalWrite(motorB1,  dirB);
-    digitalWrite(motorB2, !dirB);
+    digitalWrite(motorLeft1 ,  dirLeft );
+    digitalWrite(motorLeft2 , !dirLeft );
+    digitalWrite(motorRight1,  dirRight);
+    digitalWrite(motorRight2, !dirRight);
 }
 
-char MotorDriver::SendVelocits(double percentA, double percentB){
-    char velocA = char(velocity * percentA);
-    char velocB = char(velocity * percentA);
-
-    return velocA, velocB;
-}
 void MotorDriver::SetDirectionalVelocity(int8_t dir, uint8_t vel)
 {
     SetDirection(dir);
-    SetVelocity(vel);
+    SetVelocity (vel);
 }
 
-unsigned char MotorDriver::ReturnVelocity()
+void MotorDriver::SendVelocity(char* velocLeft, char* velocRighe)
 {
-    double percent = abs(direction) / 180;
+    if (direction == 0) {
+        RelateVelocity(1, 1, velocLeft, velocRighe);
+        return;
+    }
 
-    double percA = (0 + percent);
-    double percB = (1 - percent);
+    double percentage = abs(direction) / 180;
+
+    double relationLeft ;
+    double relationRight;
 
 
-    if (direction > 0) return SendVelocits(percA, percB);
+    if (direction > 0) {
+        relationLeft  = 1 - percentage;
+        relationRight = percentage;
 
-    if (direction < 0) return SendVelocits(percB, percA);
+    } else {
 
-    return SendVelocits(1, 1);
+        relationLeft  = percentage;
+        relationRight = 1 - percentage;
+    }//(direction < 0)
+
+    RelateVelocity(relationLeft, relationRight, velocLeft, velocRighe);
 }
-bool MotorDriver::ReturnDirection()
-{
-    if (direction > 0) return true, false;
 
-    if (direction < 0) return false, true;
-    
-    return true, true;
+void MotorDriver::RelateVelocity(double percentL, double percentR, char* velocL, char* velocR){
+    *velocL = char(velocity * percentL);
+    *velocR = char(velocity * percentR);
+}
+
+void MotorDriver::SendDirection(bool* direcLeft, bool* direcRight)
+{
+    if (direction > 90) {
+        *direcLeft  = false;
+        *direcRight = true;
+        return;
+    }
+        
+
+    if (direction < -90) {
+        *direcLeft  = true;
+        *direcRight = false;
+        return;
+    }
+        
+    *direcLeft  = true;
+    *direcRight = true;
 }

@@ -14,10 +14,12 @@ class Ultrasonic
         inline void SetMaxDistance  (unsigned int maxDist  ) {maxDistance = maxDist;}
         void SetRange(unsigned int minDist, unsigned int maxDist);
 
-        bool   RequestDistanceOnRange();
+        bool   RequestOnRange();
         double ReturnDistance();
 
     private:
+        void EmitPulse();
+        
         uint8_t TRIG;
         uint8_t ECHO;
 

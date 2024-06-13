@@ -4,33 +4,34 @@
 
 #include "Arduino.h"
 
+
+
 class MotorDriver
 {
     public:
         MotorDriver(uint8_t pinA1, uint8_t pinA2, uint8_t pinB1, uint8_t pinB2);
-        void AttachEnables(uint8_t enA, uint8_t enB);
-
-        void DriveMotors();
-
-        char SendVelocits(double percentA, double percentB);
-        inline void SetVelocity(uint8_t vel) {velocity  = vel;}
-        inline void SetDirection(int8_t dir) {direction = dir;}
+        void AttachEnables(uint8_t enL, uint8_t enR);
         void SetDirectionalVelocity(int8_t dir, uint8_t vel);
-
-        unsigned char ReturnVelocity();
-        bool ReturnDirection();
+        inline void SetDirection(int16_t dir) {if (abs(dir) <= 180 )direction = dir;}
+        inline void SetVelocity (uint8_t vel) {if (abs(vel) <= 255) velocity  = vel;}
+        void DriveMotors();
     
     private:
-        uint8_t motorA1;
-        uint8_t motorA2;
-        uint8_t motorB1;
-        uint8_t motorB2;
 
-        uint8_t enable_A;
-        uint8_t enable_B;
+        void RelateVelocity(double percentA, double percentB, char* velocL, char* velocR);
+        void SendVelocity (char* velocLeft, char* velocRighe);
+        void SendDirection(bool* direcLeft, bool* direcRight);
+
+        uint8_t motorLeft1;
+        uint8_t motorLeft2;
+        uint8_t motorRight1;
+        uint8_t motorRight2;
+
+        uint8_t enableLeft ;
+        uint8_t enableRight;
 
         uint8_t velocity  = 255;
-        int8_t  direction = 0;
+        int16_t direction = 0;
 };
 
 
